@@ -25,7 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning
+        // suppressHydrationWarning = usado para evitar erros de hidratação no Next.js
+        // Erros de hisdração ocorrem quando o HTML gerado no servidor não corresponde ao HTML gerado no cliente.
       >
         {children}
       </body>
