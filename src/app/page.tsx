@@ -128,7 +128,7 @@ const Home = () => {
                   >
                     {task.task}</p>
                   <div className="flex justify-between items-center gap-2">
-                    <EditTask />
+                    <EditTask task={task} />
                     <Trash size={16} className="cursor-pointer" onClick={() => handleDeleteTask(task.id)}/>
                   </div>
                 </div>
