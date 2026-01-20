@@ -1,3 +1,5 @@
+'use client';
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,14 +8,64 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ArrowDownRight, Check, List, ListCheck, Plus, Sigma, Trash } from "lucide-react";
 import EditTask from "@/components/edit-task";
+import { getTasks } from "@/actions/getTask";
+import { useEffect, useState } from "react";
+import { TaskType } from "@/types/tasks";
+import { postTask } from "@/actions/postTask";
+import { deleteTask } from "@/actions/deleteTask";
 
 const Home = () => {
+  const [allTasks, setAllTasks] = useState<TaskType[]>([]);
+  const [newTask, setNewTask] = useState<string>('');
+
+  const handleGetTask = async () => {
+    try {
+      const tasks = await getTasks();
+  
+      if (!tasks) return;
+  
+      setAllTasks(tasks);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handlePostTask = async () => {
+    try {
+      if (!newTask.trim()) return;
+  
+      await postTask(newTask);
+      setNewTask('');
+      await handleGetTask();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleDeleteTask = async (id: number) => {
+    try {
+      if (!id) return;
+
+      const deletedTasks = await deleteTask(id);
+
+      if (!deletedTasks) return;
+      await handleGetTask();
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
+  useEffect(() => {
+    handleGetTask();
+  }, [])
+
   return (
     <main className="w-full h-screen bg-gray-100 flex justify-center items-center">
       <Card className="w-lg">
         <CardHeader className="flex gap-2">
-          <Input placeholder="Adicionar tarefa"/>
-          <Button className="cursor-pointer"> 
+          <Input placeholder="Adicionar tarefa" onChange={(e) => setNewTask(e.target.value)} value={newTask} />
+          <Button className="cursor-pointer" onClick={handlePostTask}>
             <Plus />
             Cadastrar
           </Button>
@@ -27,14 +79,16 @@ const Home = () => {
           </div>
 
           <div className="mt-4 border-b">
-            <div className="flex justify-between items-center h-14 border-t">
-              <div className="w-2 h-full bg-green-100"></div>
-              <p className="flex-1 px-2 text-sm">Estudar react</p>
-              <div className="flex justify-between items-center gap-2">
-                <EditTask />
-                <Trash size={16} className="cursor-pointer" />
-              </div>
-            </div>
+            {allTasks.map((task) => (
+                <div className="flex justify-between items-center h-14 border-t" key={task.id}>
+                  <div className="w-2 h-full bg-green-100"></div>
+                  <p className="flex-1 px-2 text-sm">{task.task}</p>
+                  <div className="flex justify-between items-center gap-2">
+                    <EditTask />
+                    <Trash size={16} className="cursor-pointer" onClick={() => handleDeleteTask(task.id)}/>
+                  </div>
+                </div>
+            ))}
           </div>
 
           <div className="flex justify-between mt-4">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default function RootLayout({
         // suppressHydrationWarning = usado para evitar erros de hidratação no Next.js
         // Erros de hisdração ocorrem quando o HTML gerado no servidor não corresponde ao HTML gerado no cliente.
       >
+        <Toaster position="top-right" />
         {children}
       </body>
     </html>
