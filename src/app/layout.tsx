@@ -30,7 +30,9 @@ export default function RootLayout({
         // suppressHydrationWarning = usado para evitar erros de hidratação no Next.js
         // Erros de hisdração ocorrem quando o HTML gerado no servidor não corresponde ao HTML gerado no cliente.
       >
-        <Toaster position="top-right" />
+        <Toaster position="top-right" richColors />
+        {/* Componente para exibir notificações toast */}
+        {/* richColors habilita cores ricas para os toasts */}
         {children}
       </body>
     </html>
