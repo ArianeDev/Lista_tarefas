@@ -1,24 +1,40 @@
-import { SquarePen } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { putTask } from "@/actions/putTask";
+
 import { TaskType } from "@/types/tasks";
+
+import { Button } from "./ui/button";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Input } from "./ui/input";
+
+import { SquarePen } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 type TaskProps = {
     task: TaskType;
+    handleGetTask: () => void;
 }
 
-const EditTask = ({ task } : TaskProps) => {
+const EditTask = ({ task, handleGetTask } : TaskProps) => {
     const [editedTask, setEditedTask] = useState<string>(task.task);
 
     const handleEditTask = async () => { 
-        if (task.task !== editedTask) {
-            toast.success('Tarefa editada com sucesso!');
-            
-        } else {
-            toast.warning('Nenhuma alteração feita na tarefa.');
+        try {
+            if (task.task !== editedTask) {
+                toast.success('Tarefa editada com sucesso!');
+            } else {
+                toast.warning('Nenhuma alteração feita na tarefa.');
+                return;
+            }
+    
+            await putTask({ 
+                id: task.id, 
+                newTask: editedTask
+            });
+    
+            handleGetTask();
+        } catch (error) {
+            toast.error('Erro ao editar a tarefa.');
         }
     }
 
@@ -37,11 +53,14 @@ const EditTask = ({ task } : TaskProps) => {
                     placeholder="Editar tarefa" 
                     value={editedTask}
                     onChange={(e) => setEditedTask(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleEditTask()}
                 />
-                <Button 
-                    className="cursor-pointer"
-                    onClick={handleEditTask}
-                >Editar</Button>
+                <DialogClose asChild>
+                    <Button 
+                        className="cursor-pointer"
+                        onClick={handleEditTask}
+                    >Editar</Button>
+                </DialogClose>
             </div>
             </DialogContent>
         </Dialog>

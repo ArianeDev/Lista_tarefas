@@ -1,24 +1,32 @@
 'use client';
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+import { deleteTask } from "@/actions/deleteTask";
+import { getTasks } from "@/actions/getTask";
+import { postTask } from "@/actions/postTask";
+import { toggleDone } from "@/actions/toggle-done";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import EditTask from "@/components/edit-task";
+import { FilterTask, FilterType } from "@/components/filter-task";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ArrowDownRight, Check, List, ListCheck, Plus, Sigma, Trash } from "lucide-react";
-import EditTask from "@/components/edit-task";
-import { getTasks } from "@/actions/getTask";
-import { useEffect, useState } from "react";
+
 import { TaskType } from "@/types/tasks";
-import { postTask } from "@/actions/postTask";
-import { deleteTask } from "@/actions/deleteTask";
+
+import { ListCheck, LoaderCircle, Plus, Trash } from "lucide-react";
+
+import { useEffect, useState } from "react";
+
 import { toast } from "sonner";
-import { toggleDone } from "@/actions/toggle-done";
 
 const Home = () => {
   const [allTasks, setAllTasks] = useState<TaskType[]>([]);
   const [newTask, setNewTask] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
+  const [filteredTasks, setFilteredTasks] = useState<TaskType[]>([]);
 
   const handleGetTask = async () => {
     try {
@@ -33,8 +41,14 @@ const Home = () => {
   }
 
   const handlePostTask = async () => {
+    setLoading(true);
+
     try {
-      if (!newTask.trim()) return toast.warning('Digite uma tarefa válida.');
+      if (!newTask.trim()) {
+        toast.warning('Digite uma tarefa válida.');
+        setLoading(false);
+        return; 
+      } 
   
       await postTask(newTask);
       setNewTask('');
@@ -44,6 +58,8 @@ const Home = () => {
     } catch (error) {
       toast.error('Erro ao adicionar tarefa.');
     }
+
+    setLoading(false);
   }
 
   const handleDeleteTask = async (id: number) => {
@@ -90,10 +106,29 @@ const Home = () => {
       toast.error('Erro ao atualizar tarefa.');
     }
   }
-  
+
   useEffect(() => {
     handleGetTask();
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    switch(currentFilter) {
+      case 'all':
+        setFilteredTasks(allTasks);
+        break;
+      case 'pending':
+        const pendingTask = allTasks.filter(task => !task.done)
+        setFilteredTasks(pendingTask);
+        break;
+      case 'completed':
+        const completedTask = allTasks.filter(task => task.done)
+        setFilteredTasks(completedTask);
+        break;
+      default:
+        setFilteredTasks(allTasks);
+        break;
+    }
+  }, [currentFilter, allTasks])
 
   return (
     <main className="w-full h-screen bg-gray-100 flex justify-center items-center">
@@ -105,21 +140,24 @@ const Home = () => {
             onKeyDown={(e) => e.key === 'Enter' && handlePostTask()}
           />
           <Button className="cursor-pointer" onClick={handlePostTask}>
-            <Plus />
+            {!loading &&
+              <Plus />
+            }
+            {loading && 
+              <LoaderCircle className="animate-spin" />
+            }
             Cadastrar
           </Button>
         </CardHeader>
         <CardContent>
           <Separator />
 
-          <div className="flex gap-2 mt-4">
-            <Badge className="cursor-pointer" variant="default"><List />Todas</Badge>
-            <Badge className="cursor-pointer" variant="outline"><ArrowDownRight />Não finalizado</Badge>
-            <Badge className="cursor-pointer" variant="outline"><Check />Concluídas</Badge>
-          </div>
+          <FilterTask currentFilter={currentFilter} setCurrentFilter={setCurrentFilter} />
 
           <div className="mt-4 border-b">
-            {allTasks.map((task) => (
+            {!allTasks.length && <p className="flex justify-center text-xs border-t p-5">Você não possui tarefas cadastradas</p>}
+            {!filteredTasks.length && <p className="flex justify-center text-xs border-t p-5">Nenhuma tarefa encontrada</p> }
+            {filteredTasks.map((task) => (
                 <div className="flex justify-between items-center h-14 border-t" key={task.id}>
                   <div className={`w-2 h-full ${task.done ? 'bg-green-300' : 'bg-red-300' }`}></div>
                   <p 
@@ -128,7 +166,7 @@ const Home = () => {
                   >
                     {task.task}</p>
                   <div className="flex justify-between items-center gap-2">
-                    <EditTask task={task} />
+                    <EditTask task={task} handleGetTask={handleGetTask} />
                     <Trash size={16} className="cursor-pointer" onClick={() => handleDeleteTask(task.id)}/>
                   </div>
                 </div>
@@ -138,7 +176,7 @@ const Home = () => {
           <div className="flex justify-between mt-4">
             <div className="flex gap-2 items-center">
               <ListCheck size={16} />
-              <p className="text-xs">Tarefas concluídas (3/3)</p>
+              <p className="text-xs">Tarefas concluídas ({allTasks.filter(task => task.done).length}/{allTasks.length})</p>
             </div>
 
             <AlertDialog>
@@ -147,23 +185,22 @@ const Home = () => {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Tem certeza que deseja excluir x itens?</AlertDialogTitle>
+                  <AlertDialogTitle>Tem certeza que deseja excluir {allTasks.filter(task => task.done).length} itens?</AlertDialogTitle>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogAction>Sim</AlertDialogAction>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction className="cursor-pointer">Sim</AlertDialogAction>
+                  <AlertDialogCancel className="cursor-pointer">Cancelar</AlertDialogCancel>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
 
           <div className="h-2 w-full bg-gray-100 mt-4 rounded-md">
-            <div className="h-full bg-blue-500 rounded-md" style={{ width: "50%" }}></div>
+            <div className="h-full bg-blue-500 rounded-md" style={{ width: `${allTasks.filter(task => task.done).length / allTasks.length * 100}%`, transition: 'width 0.3s ease' }}></div>
           </div>
 
           <div className="flex justify-end items-center gap-2 mt-2 text-xs text-gray-500">
-            <Sigma size={16} />
-            <p>3 tarefas no total</p>
+            <p>{allTasks.length} tarefas no total</p>
           </div>
 
         </CardContent>

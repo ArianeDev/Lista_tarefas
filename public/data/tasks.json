@@ -7,13 +7,18 @@
     },
     {
       "id": 2,
-      "task": "Estudar React",
+      "task": "Estudar",
       "done": true
     },
     {
       "id": 3,
-      "task": "Fazer compras",
+      "task": "Daily com o Macharete",
       "done": true
+    },
+    {
+      "id": 4,
+      "task": "Daily",
+      "done": false
     }
   ]
 }
