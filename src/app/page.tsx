@@ -152,7 +152,7 @@ const Home = () => {
   }, [currentFilter, allTasks])
 
   return (
-    <main className="w-full h-full bg-gray-100 flex justify-center p-4">
+    <main className="w-full h-full flex justify-center p-4">
       <Card className="w-lg">
         <CardHeader className="flex gap-2">
           <Input 

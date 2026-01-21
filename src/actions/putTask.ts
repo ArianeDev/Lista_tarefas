@@ -1,7 +1,6 @@
-// Diretiva que indica que esta função será executada no servidor (Next.js Server Action)
+// Diretiva que indica que esta função será executada no servidor 
 'use server';
 
-// Importa o módulo de sistema de arquivos (versão com Promises) e o módulo de manipulação de caminhos
 import fs from "fs/promises";
 import path from "path";
 
@@ -11,12 +10,6 @@ type EditTaskProps = {
     newTask: string;   // Novo texto para atualizar a tarefa
 }
 
-/**
- * Função assíncrona que atualiza uma tarefa existente no arquivo JSON
- * @param id - ID da tarefa a ser editada
- * @param newTask - Novo conteúdo/texto da tarefa
- * @returns A tarefa atualizada
- */
 export const putTask = async ({id, newTask} : EditTaskProps) => {
     try {
         // Constrói o caminho completo para o arquivo tasks.json
@@ -48,7 +41,6 @@ export const putTask = async ({id, newTask} : EditTaskProps) => {
         // Retorna a tarefa que foi atualizada
         return tasksList.tasks[taskIndex];
     } catch (error) {
-        // Propaga qualquer erro que ocorrer durante o processo
         throw error;
     }
 }

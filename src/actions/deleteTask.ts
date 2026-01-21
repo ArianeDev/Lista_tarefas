@@ -32,7 +32,6 @@ export const deleteTask = async (id: number) => {
         return updatedTasks;
         
     } catch (error) {
-        // Se der erro, repassa o erro para quem chamou a função
         throw error;
     }
 }

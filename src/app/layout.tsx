@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,14 +28,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-gray-100`} suppressHydrationWarning
         // suppressHydrationWarning = usado para evitar erros de hidratação no Next.js
         // Erros de hisdração ocorrem quando o HTML gerado no servidor não corresponde ao HTML gerado no cliente.
       >
         <Toaster position="top-right" richColors />
         {/* Componente para exibir notificações toast */}
         {/* richColors habilita cores ricas para os toasts */}
+        <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );
