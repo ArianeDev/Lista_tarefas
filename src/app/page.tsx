@@ -5,6 +5,7 @@ import { deleteTask } from "@/actions/deleteTask";
 import { getTasks } from "@/actions/getTask";
 import { postTask } from "@/actions/postTask";
 import { toggleDone } from "@/actions/toggle-done";
+import { deleteCompletedTask } from "@/actions/clearCompletedTask";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -27,6 +28,8 @@ const Home = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
   const [filteredTasks, setFilteredTasks] = useState<TaskType[]>([]);
+
+  const deleteTaks = false;
 
   const handleGetTask = async () => {
     try {
@@ -107,6 +110,24 @@ const Home = () => {
     }
   }
 
+  const clearCompletedTasks = async () => {
+    try {
+      const listTasks = await deleteCompletedTask();
+      
+      if (!listTasks) return;
+
+      if (listTasks.length === allTasks.length) {
+        toast.warning('Nenhuma tarefa concluída para limpar.');
+        return;
+      }
+      
+      await handleGetTask();
+      toast.success('Tarefas concluídas limpas com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao limpar tarefas concluídas.');
+    }
+  }
+
   useEffect(() => {
     handleGetTask();
   }, []);
@@ -131,7 +152,7 @@ const Home = () => {
   }, [currentFilter, allTasks])
 
   return (
-    <main className="w-full h-screen bg-gray-100 flex justify-center items-center">
+    <main className="w-full h-full bg-gray-100 flex justify-center p-4">
       <Card className="w-lg">
         <CardHeader className="flex gap-2">
           <Input 
@@ -185,10 +206,18 @@ const Home = () => {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Tem certeza que deseja excluir {allTasks.filter(task => task.done).length} itens?</AlertDialogTitle>
+                  {allTasks.filter(task => task.done).length === 0 && 
+                    <AlertDialogTitle>Nenhuma tarefa concluída para excluir.</AlertDialogTitle>
+                  }
+                  {allTasks.filter(task => task.done).length > 0 &&
+                    <AlertDialogTitle>Tem certeza que deseja excluir {allTasks.filter(task => task.done).length} itens?</AlertDialogTitle>
+                  }
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogAction className="cursor-pointer">Sim</AlertDialogAction>
+                  <AlertDialogAction 
+                    className="cursor-pointer"
+                    onClick={clearCompletedTasks}
+                  >Sim</AlertDialogAction>
                   <AlertDialogCancel className="cursor-pointer">Cancelar</AlertDialogCancel>
                 </AlertDialogFooter>
               </AlertDialogContent>

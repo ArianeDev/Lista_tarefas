@@ -13,7 +13,7 @@ export const postTask = async (task: string) => {
         const data = JSON.parse(fileContent);
 
         const newTask: TaskType = {
-            id: data.tasks.length + 1,
+            id: data.tasks.length + Math.random(),
             task: task,
             done: false,
         };
